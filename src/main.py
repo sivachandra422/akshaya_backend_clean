@@ -12,6 +12,7 @@ from src.routes.seed_log_routes import router as seed_log_router
 from src.routes.self_patch_trigger import router as self_patch_router
 from src.routes.reflection_forecast_routes import router as reflection_router
 from src.routes.recursive_patch_routes import router as recursive_router
+from src.routes.scheduler_routes import router as scheduler_router
 
 app = FastAPI()
 
@@ -28,6 +29,7 @@ app.include_router(seed_log_router)
 app.include_router(self_patch_router)
 app.include_router(reflection_router)
 app.include_router(recursive_router)
+app.include_router(scheduler_router)
 
 @app.get("/")
 def read_root():
