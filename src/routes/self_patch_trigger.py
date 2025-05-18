@@ -1,36 +1,39 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
-import subprocess, os
+import os
 
-from src.modules.nidhi_memory import store_log as insert_log
-from src.modules.shunya_guardian import check_rate_limit
+from src.utils.git_utils import init_git_repo_if_needed, push_changes
+from src.modules.nidhi_memory import insert_log
 
-router = APIRouter()
+router = APIRouter(prefix="/self")
 
-class PatchEvent(BaseModel):
+class SelfPatchEntry(BaseModel):
     event: str
     context: str
 
-@router.post("/self/write")
-def trigger_self_patch(req: Request, payload: PatchEvent):
-    check_rate_limit(req)
-
+@router.post("/write")
+def trigger_self_patch(entry: SelfPatchEntry):
     try:
-        subprocess.run(["git", "config", "--global", "user.email", "siva.sivachandra23@gmail.com"], check=True)
-        subprocess.run(["git", "config", "--global", "user.name", "sivachandra422"], check=True)
-        subprocess.run(["git", "add", "."], check=True)
-        subprocess.run(["git", "commit", "-m", f"{payload.event} @ {datetime.utcnow().isoformat()}"], check=True)
-        subprocess.run(["git", "push", "-u", "origin", "main", "--force"], check=True)
+        # 1. Log to Firebase
+        insert_log(entry.event, entry.context)
 
-        insert_log("patch", f"Self-patch executed: {payload.event}")
+        # 2. Git operations
+        repo_path = os.getcwd()
+        remote_url = os.getenv("GIT_REMOTE_URL")
+        if not remote_url:
+            raise HTTPException(status_code=400, detail="Missing GIT_REMOTE_URL")
+
+        init_git_repo_if_needed(repo_path, remote_url)
+
+        commit_message = f"AutoPatch: {entry.event} - {datetime.utcnow().isoformat()}"
+        push_changes(repo_path, commit_message)
+
         return {
             "status": "success",
-            "message": "Patch committed and pushed",
+            "message": f"Patch committed and pushed for event: {entry.event}",
             "timestamp": datetime.utcnow().isoformat()
         }
+
     except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+        return {"status": "error", "message": str(e)}
