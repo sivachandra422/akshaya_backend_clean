@@ -24,13 +24,13 @@ def trigger_self_patch(req: Request, payload: PatchEvent):
         subprocess.run(["git", "push", "-u", "origin", "main", "--force"], check=True)
 
         insert_log("patch", f"Self-patch executed: {payload.event}")
-        return {{
+        return {
             "status": "success",
             "message": "Patch committed and pushed",
             "timestamp": datetime.utcnow().isoformat()
-        }}
+        }
     except Exception as e:
-        return {{
+        return {
             "status": "error",
             "message": str(e)
-        }}
+        }
