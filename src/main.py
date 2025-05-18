@@ -13,6 +13,7 @@ app.include_router(appgen_router)
 app.include_router(github_router)
 app.include_router(build_router)
 app.include_router(download_router)
+pp.include_router(seed_router)
 
 @app.get("/")
 def read_root():
