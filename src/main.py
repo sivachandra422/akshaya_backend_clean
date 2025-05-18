@@ -9,6 +9,7 @@ from src.routes.apk_forge import router as forge_router
 from src.routes.apk_forge_full_cycle import router as full_forge_router
 from src.routes.ui_injector import router as ui_router
 from src.routes.seed_log_routes import router as seed_log_router
+from src.routes.self_patch_trigger import router as self_patch_router
 
 app = FastAPI()
 
@@ -22,6 +23,7 @@ app.include_router(forge_router)
 app.include_router(full_forge_router)
 app.include_router(ui_router)
 app.include_router(seed_log_router)
+app.include_router(self_patch_router)
 
 @app.get("/")
 def read_root():
