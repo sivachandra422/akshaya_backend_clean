@@ -18,6 +18,8 @@ from src.routes.vyuhaa_routes import router as vyuhaa_router
 from src.routes.git_configurator import router as git_router
 
 app = FastAPI()
+from src.routes.seed_identity_routes import router as identity_router
+
 
 app.include_router(voice_router)
 app.include_router(appgen_router)
@@ -40,3 +42,5 @@ app.include_router(git_router)
 @app.get("/")
 def read_root():
     return {"message": "Akshaya backend is fully alive"}
+
+app.include_router(identity_router)
