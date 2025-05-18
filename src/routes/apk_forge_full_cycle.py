@@ -13,8 +13,19 @@ class FullForgeRequest(BaseModel):
 @router.post("/full-cycle")
 def forge_full_cycle(req: FullForgeRequest):
     app_name = req.app_name.strip().replace(" ", "_")
-    repo_url = req.repo_url.strip()
+    base_repo_url = req.repo_url.strip()
     base_path = f"./generated/{app_name}"
+
+    # Load token from environment
+    token = os.getenv("GITHUB_PAT")
+    if not token:
+        raise HTTPException(status_code=500, detail="GITHUB_PAT environment variable not set.")
+
+    # Inject token into repo URL
+    if base_repo_url.startswith("https://"):
+        secure_repo_url = base_repo_url.replace("https://", f"https://{token}@")
+    else:
+        secure_repo_url = f"https://{token}@{base_repo_url}"
 
     try:
         # STEP 1: Create project structure
@@ -57,18 +68,16 @@ class HomeScreen extends StatelessWidget {
         # STEP 2: Push to GitHub
         if not os.path.exists(os.path.join(base_path, ".git")):
             subprocess.run(["git", "init"], cwd=base_path, check=True)
-            subprocess.run(["git", "remote", "add", "origin", repo_url], cwd=base_path, check=True)
+            subprocess.run(["git", "remote", "add", "origin", secure_repo_url], cwd=base_path, check=True)
 
-        # Ensure git identity is set
-        subprocess.run(["git", "config", "user.email", "siva.sivachandra23@gmail.com"], cwd=base_path, check=True)
-        subprocess.run(["git", "config", "user.name", "sivachandra422"], cwd=base_path, check=True)
+        subprocess.run(["git", "config", "user.email", "akshaya@yourdomain.com"], cwd=base_path, check=True)
+        subprocess.run(["git", "config", "user.name", "Akshaya Forge"], cwd=base_path, check=True)
 
         subprocess.run(["git", "add", "."], cwd=base_path, check=True)
 
-        # Only commit if there are changes
         try:
             subprocess.run(["git", "commit", "-m", f"Akshaya Full-Cycle {datetime.utcnow().isoformat()}"], cwd=base_path, check=True)
-        except subprocess.CalledProcessError as ce:
+        except subprocess.CalledProcessError:
             raise HTTPException(status_code=400, detail="Nothing to commit. Repo might already be up to date.")
 
         subprocess.run(["git", "push", "-u", "origin", "main", "--force"], cwd=base_path, check=True)
@@ -77,7 +86,7 @@ class HomeScreen extends StatelessWidget {
             "status": "success",
             "message": f"{app_name} generated and pushed to GitHub.",
             "timestamp": datetime.utcnow().isoformat(),
-            "repo": repo_url
+            "repo": base_repo_url
         }
 
     except Exception as e:
