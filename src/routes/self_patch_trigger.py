@@ -4,7 +4,7 @@ from datetime import datetime
 import os
 
 from src.utils.git_utils import init_git_repo_if_needed, push_changes
-from src.modules.nidhi_memory import insert_log
+from src.modules.nidhi_memory import store_log as insert_log
 
 router = APIRouter(prefix="/self")
 
