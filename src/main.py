@@ -15,6 +15,7 @@ from src.routes.recursive_patch_routes import router as recursive_router
 from src.routes.scheduler_routes import router as scheduler_router
 from src.routes.seed_expand import router as seed_expand_router
 from src.routes.vyuhaa_routes import router as vyuhaa_router
+from src.routes.git_configurator import router as git_router
 
 app = FastAPI()
 
@@ -34,6 +35,7 @@ app.include_router(recursive_router)
 app.include_router(scheduler_router)
 app.include_router(seed_expand_router)
 app.include_router(vyuhaa_router)
+app.include_router(git_router)
 
 @app.get("/")
 def read_root():
