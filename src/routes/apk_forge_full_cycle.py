@@ -60,8 +60,8 @@ class HomeScreen extends StatelessWidget {
             subprocess.run(["git", "remote", "add", "origin", repo_url], cwd=base_path, check=True)
 
         # Ensure git identity is set
-        subprocess.run(["git", "config", "user.email", "akshaya@yourdomain.com"], cwd=base_path, check=True)
-        subprocess.run(["git", "config", "user.name", "Akshaya Forge"], cwd=base_path, check=True)
+        subprocess.run(["git", "config", "user.email", "siva.sivachandra23@gmail.com"], cwd=base_path, check=True)
+        subprocess.run(["git", "config", "user.name", "sivachandra422"], cwd=base_path, check=True)
 
         subprocess.run(["git", "add", "."], cwd=base_path, check=True)
 
