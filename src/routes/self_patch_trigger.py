@@ -4,6 +4,7 @@ import subprocess
 from datetime import datetime
 import os
 import json
+from pathlib import Path
 
 router = APIRouter(prefix="/self")
 
@@ -30,23 +31,34 @@ def self_write(entry: SelfPatchEntry):
             logs = []
 
         logs.append(new_log)
-
         with open(log_path, "w") as f:
             json.dump(logs, f, indent=2)
 
-        # Ensure Git config is set to avoid commit errors
-        subprocess.run(["git", "config", "--global", "user.name", "sivachandra422"], check=True)
-        subprocess.run(["git", "config", "--global", "user.email", "siva.sivachandra23@gmail.com"], check=True)
+        # Git setup
+        if not Path(".git").exists():
+            subprocess.run(["git", "init"], check=True)
 
-        # Commit and push patch
+        # Ensure 'main' branch exists
+        subprocess.run(["git", "checkout", "-B", "main"], check=True)
+
+        # Set Git identity (necessary in Render)
+        subprocess.run(["git", "config", "user.name", "sivachandra422"], check=True)
+        subprocess.run(["git", "config", "user.email", "siva.sivachandra23@gmail.com"], check=True)
+
+        # Ensure remote is set correctly
+        subprocess.run(["git", "remote", "remove", "origin"], stderr=subprocess.DEVNULL)
+        subprocess.run(["git", "remote", "add", "origin", "https://github.com/sivachandra422/akshaya_backend_clean.git"], check=True)
+
+        # Commit and push
         subprocess.run(["git", "add", "."], check=True)
         subprocess.run(["git", "commit", "-m", f"AutoPatch: {entry.event}"], check=True)
         subprocess.run(["git", "push", "-u", "origin", "main", "--force"], check=True)
 
         return {
             "status": "success",
-            "message": f"Patch committed for event: {entry.event}",
+            "message": f"Patch committed and pushed for event: {entry.event}",
             "timestamp": timestamp
         }
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
