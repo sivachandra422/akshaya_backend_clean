@@ -59,8 +59,18 @@ class HomeScreen extends StatelessWidget {
             subprocess.run(["git", "init"], cwd=base_path, check=True)
             subprocess.run(["git", "remote", "add", "origin", repo_url], cwd=base_path, check=True)
 
+        # Ensure git identity is set
+        subprocess.run(["git", "config", "user.email", "akshaya@yourdomain.com"], cwd=base_path, check=True)
+        subprocess.run(["git", "config", "user.name", "Akshaya Forge"], cwd=base_path, check=True)
+
         subprocess.run(["git", "add", "."], cwd=base_path, check=True)
-        subprocess.run(["git", "commit", "-m", f"Akshaya Full-Cycle {datetime.utcnow().isoformat()}"], cwd=base_path, check=True)
+
+        # Only commit if there are changes
+        try:
+            subprocess.run(["git", "commit", "-m", f"Akshaya Full-Cycle {datetime.utcnow().isoformat()}"], cwd=base_path, check=True)
+        except subprocess.CalledProcessError as ce:
+            raise HTTPException(status_code=400, detail="Nothing to commit. Repo might already be up to date.")
+
         subprocess.run(["git", "push", "-u", "origin", "main", "--force"], cwd=base_path, check=True)
 
         return {
