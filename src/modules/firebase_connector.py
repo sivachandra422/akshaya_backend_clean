@@ -5,15 +5,12 @@ from firebase_admin import credentials
 
 load_dotenv()  # Will load .env only when it exists
 
-firebase_creds_raw = os.getenv("FIREBASE_CREDS_JSON")
+def init_firestore():
+    path = os.getenv("FIREBASE_CREDS_PATH", "/etc/secrets/firebase_creds.json")
+    if not os.path.exists(path):
+        raise ValueError("Firebase credentials not found")
 
-# For local dev fallback to file if ENV is missing
-if not firebase_creds_raw and os.path.exists("./firebase_creds.json"):
-    with open("./firebase_creds.json") as f:
-        firebase_creds_raw = f.read()
-
-if not firebase_creds_raw:
-    raise ValueError("Firebase credentials not found")
-
-firebase_creds_dict = json.loads(firebase_creds_raw)
-cred = credentials.Certificate(firebase_creds_dict)
+    cred = credentials.Certificate(path)
+    if not firebase_admin._apps:
+        initialize_app(cred)
+    return firestore.client()
