@@ -1,0 +1,8 @@
+# Akshaya Fireseed Ignore Rules
+firebase_creds.json
+*.lock
+__pycache__/
+.env
+.idea/
+.vscode/
+*.pyc
