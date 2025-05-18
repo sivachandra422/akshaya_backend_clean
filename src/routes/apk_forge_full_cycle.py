@@ -80,7 +80,14 @@ class HomeScreen extends StatelessWidget {
         except subprocess.CalledProcessError:
             raise HTTPException(status_code=400, detail="Nothing to commit. Repo might already be up to date.")
 
-        subprocess.run(["git", "push", "-u", "origin", "main", "--force"], cwd=base_path, check=True)
+        result = subprocess.run(
+            ["git", "push", "-u", "origin", "main", "--force"],
+            cwd=base_path,
+            capture_output=True,
+            text=True
+        )
+        if result.returncode != 0:
+            raise HTTPException(status_code=500, detail=result.stderr)
 
         return {
             "status": "success",
