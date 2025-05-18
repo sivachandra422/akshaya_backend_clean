@@ -4,6 +4,7 @@ from src.routes.app_generator import router as appgen_router
 from src.routes.github_push import router as github_router
 from src.routes.build_trigger import router as build_router
 from src.routes.download_status import router as download_router
+from src.routes.seed_core import router as seed_router
 
 app = FastAPI()
 
