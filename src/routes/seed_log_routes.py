@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Request, HTTPException
-from src.modules.nidhi_memory import store_log, get_all_logs
+from fastapi import APIRouter, HTTPException, Request
+from src.modules.nidhi_memory import store_log
 
-router = APIRouter(prefix="/seed")
+router = APIRouter()
 
-@router.post("/log")
-async def log_seed_event(request: Request):
-    data = await request.json()
-    if not data.get("event"):
-        raise HTTPException(status_code=400, detail="Missing 'event' in log entry.")
-    return store_log(data)
+@router.post("/seed/log")
+async def log_event(request: Request):
+    try:
+        payload = await request.json()
+        if "event" not in payload or "context" not in payload:
+            raise ValueError("Missing required keys: 'event' and 'context'.")
 
-@router.get("/history")
-def read_log_history():
-    return {"logs": get_all_logs()}
+        result = store_log(payload["event"], payload["context"])
+        return result
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
