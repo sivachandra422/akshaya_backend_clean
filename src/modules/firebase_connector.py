@@ -9,11 +9,17 @@ def init_firestore():
     global db, firebase_initialized
 
     if not firebase_initialized:
-        # Read the path from environment variable
-        firebase_path = os.getenv("FIREBASE_PATH")
+        firebase_path = os.getenv("FIREBASE_CREDS_PATH")
 
-        if not firebase_path or not os.path.exists(firebase_path):
-            raise ValueError("Firebase credentials not found or path is invalid")
+        if not firebase_path:
+            raise ValueError("FIREBASE_CREDS_PATH is not set")
+
+        # Ensure absolute path if needed
+        if not firebase_path.startswith("/"):
+            firebase_path = "/" + firebase_path
+
+        if not os.path.exists(firebase_path):
+            raise ValueError(f"Firebase credentials path '{firebase_path}' is invalid or not found")
 
         cred = credentials.Certificate(firebase_path)
         firebase_admin.initialize_app(cred)
