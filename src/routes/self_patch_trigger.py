@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import datetime
 import subprocess, os
 
-from src.modules.nidhi_memory import insert_log
+from src.modules.nidhi_memory import store_log as insert_log
 from src.modules.shunya_guardian import check_rate_limit
 
 router = APIRouter()
