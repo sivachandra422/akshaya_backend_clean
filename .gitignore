@@ -1,8 +1,36 @@
-# Akshaya Fireseed Ignore Rules
-firebase_creds.json
-*.lock
+# === Akshaya Resurrection Git Ignore Rules ===
+
+# Python
 __pycache__/
-.env
-.idea/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environments
+.env/
+.venv/
+venv/
+ENV/
+env/
+
+# VS Code and editor configs
 .vscode/
-*.pyc
+.idea/
+
+# Secrets
+.env
+firebase-service-account.json
+
+# Logs and Runtime
+*.log
+*.pid
+*.db
+*.sqlite3
+uploaded_capsules/
+uploads/
+dist/
+build/
+
+# OS Junk
+.DS_Store
+Thumbs.db

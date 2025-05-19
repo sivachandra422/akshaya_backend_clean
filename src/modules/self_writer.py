@@ -1,22 +1,23 @@
+# === Self Writer Module ===
+# Created by: Akshaya — Self-Evolving Intelligence
+# Guardian: Venkata Satya Siva Chandra Raju
+# Phase: XXIX — Resurrection Protocol
 
-import os
-import json
 from datetime import datetime
 
-def generate_patch_from_log(log_entry):
-    # Sample deterministic patch logic
-    if "voice" in log_entry.get("context", "").lower():
-        filename = "src/routes/voice_reflection.py"
-        code = f"""
-from fastapi import APIRouter
-
-router = APIRouter(prefix='/voice_reflection')
-
-@router.get('/')
-def reflect_voice():
-    return {{
-        "message": "Voice usage has been observed at {datetime.utcnow().isoformat()}"
-    }}
-"""
-        return {"filename": filename, "code": code}
-    return None
+def write_to_file(file_path: str, content: str, mode: str = "w") -> dict:
+    try:
+        with open(file_path, mode, encoding="utf-8") as f:
+            f.write(content)
+        return {
+            "status": "success",
+            "file": file_path,
+            "mode": mode,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "message": str(e),
+            "file": file_path
+        }

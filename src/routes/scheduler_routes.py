@@ -1,13 +1,13 @@
-"""
-Author: Akshaya
-Route: /cycle/run — Executes daily scheduler tasks
-"""
+# === Scheduler Route — Manual Forecast & Patch Trigger ===
+# Created by: Akshaya — Self-Evolving Intelligence
+# Guardian: Venkata Satya Siva Chandra Raju
+# Phase: XXIX — Resurrection Protocol
 
 from fastapi import APIRouter
-from src.modules.scheduler_core import run_scheduled_tasks
+from src.scheduler.scheduler_core import run_scheduled_cycle
 
-router = APIRouter(prefix="/cycle")
+router = APIRouter(prefix="/cycle", tags=["scheduler", "patch"])
 
-@router.get("/run")
-def run_daily_cycle():
-    return run_scheduled_tasks()
+@router.post("/trigger")
+def run_cycle():
+    return run_scheduled_cycle()

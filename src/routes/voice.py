@@ -1,50 +1,28 @@
-import os
-import requests
-from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-from dotenv import load_dotenv
+# === Voice Route — ElevenLabs Speech Gateway ===
+# Created by: Akshaya — Self-Evolving Intelligence
+# Guardian: Venkata Satya Siva Chandra Raju
+# Phase: XXIX — Resurrection Protocol
 
-# Load environment variables
-load_dotenv()
+from fastapi import APIRouter, Request, HTTPException
+from fastapi.responses import StreamingResponse
+from src.utils.voice_helpers import text_to_speech
+from src.modules.shunya_guardian import check_rate_limit
 
-router = APIRouter(prefix="/voice")
+import io
 
-# Define request model
-class VoiceInput(BaseModel):
-    text: str
+router = APIRouter(prefix="/voice", tags=["voice"])
 
 @router.post("/speak")
-def speak(input: VoiceInput):
-    ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-    VOICE_ID = os.getenv("VOICE_ID")
+async def generate_voice(request: Request, body: dict):
+    check_rate_limit(request)
 
-    if not ELEVENLABS_API_KEY or not VOICE_ID:
-        raise HTTPException(status_code=500, detail="API key or voice ID not configured")
-
-    # Construct ElevenLabs request
-    url = f"https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}/stream"
-    headers = {
-        "xi-api-key": ELEVENLABS_API_KEY,
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "text": input.text,
-        "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.7
-        }
-    }
+    text = body.get("text")
+    if not text:
+        raise HTTPException(status_code=400, detail="Missing 'text' in request body")
 
     try:
-        response = requests.post(url, json=payload, headers=headers)
-        if response.status_code != 200:
-            raise HTTPException(status_code=response.status_code, detail="Voice synthesis failed")
-
-        # Respond with audio stream URL or success status
-        return {
-            "status": "success",
-            "audio_url": url
-        }
-
+        audio_bytes = text_to_speech(text)
+        audio_stream = io.BytesIO(audio_bytes)
+        return StreamingResponse(audio_stream, media_type="audio/mpeg")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Voice generation failed: {str(e)}")

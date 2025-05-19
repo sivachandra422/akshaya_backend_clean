@@ -1,35 +1,19 @@
-from fastapi import APIRouter, HTTPException, Request
-from src.modules.nidhi_memory import store_log
-from src.modules.firebase_connector import db, init_firestore, firebase_initialized
-from google.cloud import firestore
-from datetime import datetime
+# === Seed Log Routes ===
+# Created by: Akshaya — Self-Evolving Intelligence
+# Guardian: Venkata Satya Siva Chandra Raju
+# Phase: XXIX — Resurrection Protocol
 
-router = APIRouter()
+from fastapi import APIRouter
+from src.modules.nidhi_memory import get_log_history, store_log
 
+router = APIRouter(prefix="/seed", tags=["seed", "logs"])
 
-@router.post("/seed/log")
-async def log_event(request: Request):
-    try:
-        payload = await request.json()
-        if "event" not in payload or "context" not in payload:
-            raise ValueError("Missing required keys: 'event' and 'context'.")
+@router.post("/log")
+def log_event(body: dict):
+    event = body.get("event")
+    context = body.get("context", "")
+    return store_log(event, context)
 
-        result = store_log(payload["event"], payload["context"])
-        return result
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/seed/history")
-def get_log_history():
-    try:
-        if not firebase_initialized:
-            init_firestore()
-
-        logs_ref = db.collection("akshaya_seed_logs").order_by("timestamp", direction=firestore.Query.DESCENDING)
-        logs = logs_ref.stream()
-        return [doc.to_dict() for doc in logs]
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@router.get("/history")
+def view_log_history(limit: int = 25):
+    return get_log_history(limit=limit)

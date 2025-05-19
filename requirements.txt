@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-python-dotenv
+google-cloud-firestore
+google-auth
 requests
-firebase-admin
-apscheduler
+python-dotenv

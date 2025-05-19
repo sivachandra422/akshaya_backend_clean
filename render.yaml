@@ -1,12 +1,23 @@
+# === render.yaml — Akshaya Render Deployment ===
 services:
   - type: web
-    name: akshaya-backend
+    name: akshaya-api
     env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn src.main:app --host 0.0.0.0 --port 10000
-    autoDeploy: true
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port 10000"
     envVars:
+      - key: OPENAI_API_KEY
+        sync: false
       - key: ELEVENLABS_API_KEY
         sync: false
       - key: VOICE_ID
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_USERNAME
+        sync: false
+      - key: GITHUB_REPO_NAME
+        sync: false
+      - key: FIREBASE_CREDENTIALS
         sync: false
