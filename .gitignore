@@ -20,6 +20,7 @@ env/
 # Secrets
 .env
 firebase-service-account.json
+firebase_creds.json
 
 # Logs and Runtime
 *.log
