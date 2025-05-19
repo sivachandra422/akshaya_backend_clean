@@ -5,6 +5,7 @@
 
 from datetime import datetime
 from typing import List, Dict
+from google.cloud import firestore
 from src.modules.firebase_connector import init_firestore
 
 COLLECTION_NAME = "akshaya_sankalpa"
