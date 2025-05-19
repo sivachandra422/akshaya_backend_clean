@@ -5,6 +5,7 @@ import os
 import json
 from pathlib import Path
 import subprocess
+from uuid import uuid4
 
 from src.utils.git_utils import commit_and_push_patch
 from src.modules.nidhi_memory import insert_log
@@ -31,47 +32,36 @@ def self_patch(req: SelfPatchRequest):
             subprocess.run(["git", "init"], cwd=repo_path, check=True)
             subprocess.run(["git", "remote", "add", "origin", remote_url], cwd=repo_path, check=True)
 
-        # Step 2: Try patching directly
-        try:
-            commit_and_push_patch(repo_path, commit_message, remote_url)
-
-        except Exception as e:
-            if "nothing to commit" in str(e):
-                # Fallback: write to patch_log.json
-                patch_log_path = Path("patch_log.json")
-                fallback_entry = {
-                    "event": req.event,
-                    "context": req.context,
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-
-                if patch_log_path.exists():
-                    with patch_log_path.open("r+") as f:
-                        logs = json.load(f)
-                        logs.append(fallback_entry)
-                        f.seek(0)
-                        json.dump(logs, f, indent=2)
-                        f.truncate()
-                else:
-                    with patch_log_path.open("w") as f:
-                        json.dump([fallback_entry], f, indent=2)
-
-                # Retry Git patch after fallback
-                commit_and_push_patch(repo_path, f"{commit_message} (fallback log)", remote_url)
-            else:
-                raise e
-
-        # Step 3: Log to Firebase
-        insert_log({
+        # Step 2: Always write a unique patch_log.json entry
+        patch_log_path = Path("patch_log.json")
+        log_entry = {
             "event": req.event,
             "context": req.context,
-            "timestamp": datetime.utcnow().isoformat()
-        })
+            "timestamp": datetime.utcnow().isoformat(),
+            "uuid": str(uuid4())  # Ensures uniqueness every time
+        }
+
+        if patch_log_path.exists():
+            with patch_log_path.open("r+", encoding="utf-8") as f:
+                logs = json.load(f)
+                logs.append(log_entry)
+                f.seek(0)
+                json.dump(logs, f, indent=2)
+                f.truncate()
+        else:
+            with patch_log_path.open("w", encoding="utf-8") as f:
+                json.dump([log_entry], f, indent=2)
+
+        # Step 3: Git patch and push
+        commit_and_push_patch(repo_path, commit_message, remote_url)
+
+        # Step 4: Firebase log (preserved)
+        insert_log(log_entry)
 
         return {
             "status": "success",
             "message": f"Patch committed and pushed for event: {req.event}",
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": log_entry["timestamp"]
         }
 
     except Exception as e:
