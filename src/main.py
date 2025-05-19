@@ -16,7 +16,6 @@ from src.routes.apk_forge_full_cycle import router as apk_forge_router
 from src.routes.self_patch_trigger import router as patch_router
 
 from src.scheduler.scheduler import scheduler
-from apscheduler.schedulers.background import BackgroundScheduler
 
 app = FastAPI()
 
