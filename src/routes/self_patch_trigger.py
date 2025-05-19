@@ -17,18 +17,17 @@ def self_patch(req: SelfPatchRequest):
     try:
         print(f"[PATCH] Self-triggered patch: {req.event} | {req.context}")
 
-        # Set repo path and remote
-        repo_path = "."  # current directory of Render deployment
-        remote_url = os.getenv("GIT_REPO")
+        repo_path = "."  # base working directory
+        remote_url = os.getenv("GIT_REMOTE_URL")
         if not remote_url:
-            raise ValueError("Missing GIT_REPO environment variable")
+            raise ValueError("Missing GIT_REMOTE_URL environment variable")
 
         commit_message = f"{req.event} — {req.context}"
 
-        # Commit + push
+        # Git commit + push
         commit_and_push_patch(repo_path, commit_message, remote_url)
 
-        # Log patch event to Firestore
+        # Log to Firestore
         log_entry = {
             "event": req.event,
             "context": req.context,
