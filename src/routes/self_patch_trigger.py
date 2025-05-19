@@ -1,39 +1,37 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
-import os
-
-from src.utils.git_utils import init_git_repo_if_needed, push_changes
-from src.modules.nidhi_memory import store_log as insert_log
+from src.modules.git_utils import commit_and_push_patch
+from src.modules.nidhi_memory import insert_log
 
 router = APIRouter(prefix="/self")
 
-class SelfPatchEntry(BaseModel):
+class SelfPatchRequest(BaseModel):
     event: str
-    context: str
+    context: str  # must be named 'context' to match your POST
 
 @router.post("/write")
-def trigger_self_patch(entry: SelfPatchEntry):
+def self_patch(req: SelfPatchRequest):
     try:
-        # 1. Log to Firebase
-        insert_log(entry.event, entry.context)
+        print(f"[PATCH] Received self-patch trigger: {req.event} - {req.context}")
 
-        # 2. Git operations
-        repo_path = os.getcwd()
-        remote_url = os.getenv("GIT_REMOTE_URL")
-        if not remote_url:
-            raise HTTPException(status_code=400, detail="Missing GIT_REMOTE_URL")
+        # Commit patch to GitHub
+        commit_msg = f"{req.event} — {req.context}"
+        commit_and_push_patch(commit_msg)
 
-        init_git_repo_if_needed(repo_path, remote_url)
-
-        commit_message = f"AutoPatch: {entry.event} - {datetime.utcnow().isoformat()}"
-        push_changes(repo_path, commit_message)
+        # Store event in Firestore
+        log_entry = {
+            "event": req.event,
+            "context": req.context
+        }
+        insert_log(log_entry)
 
         return {
             "status": "success",
-            "message": f"Patch committed and pushed for event: {entry.event}",
+            "message": f"Patch committed and pushed for event: {req.event}",
             "timestamp": datetime.utcnow().isoformat()
         }
 
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        print(f"[ERROR] Self-patch failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
