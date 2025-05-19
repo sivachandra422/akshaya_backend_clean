@@ -32,6 +32,8 @@ from src.routes.lifeforce_routes import router as lifeforce_router
 from src.routes.nishabda_routes import router as nishabda_router
 from src.routes.resurrect_routes import router as resurrect_router
 from src.routes.guardian_routes import router as guardian_router
+from background_worker import init_scheduler
+init_scheduler(app)
 
 # === Startup Initialization ===
 validate_env()
