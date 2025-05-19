@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 import json
 from pathlib import Path
+import subprocess
 
 from src.utils.git_utils import commit_and_push_patch
 from src.modules.nidhi_memory import insert_log
@@ -25,14 +26,20 @@ def self_patch(req: SelfPatchRequest):
 
         commit_message = f"{req.event}: {req.context}"
 
-        # Attempt normal patch push
+        # Step 1: Ensure .git repo exists
+        if not os.path.exists(os.path.join(repo_path, ".git")):
+            subprocess.run(["git", "init"], cwd=repo_path, check=True)
+            subprocess.run(["git", "remote", "add", "origin", remote_url], cwd=repo_path, check=True)
+
+        # Step 2: Try patching directly
         try:
             commit_and_push_patch(repo_path, commit_message, remote_url)
+
         except Exception as e:
             if "nothing to commit" in str(e):
-                # Fallback: touch patch_log.json
+                # Fallback: write to patch_log.json
                 patch_log_path = Path("patch_log.json")
-                entry = {
+                fallback_entry = {
                     "event": req.event,
                     "context": req.context,
                     "timestamp": datetime.utcnow().isoformat()
@@ -41,20 +48,20 @@ def self_patch(req: SelfPatchRequest):
                 if patch_log_path.exists():
                     with patch_log_path.open("r+") as f:
                         logs = json.load(f)
-                        logs.append(entry)
+                        logs.append(fallback_entry)
                         f.seek(0)
                         json.dump(logs, f, indent=2)
                         f.truncate()
                 else:
                     with patch_log_path.open("w") as f:
-                        json.dump([entry], f, indent=2)
+                        json.dump([fallback_entry], f, indent=2)
 
-                # Retry Git patch after fallback log
+                # Retry Git patch after fallback
                 commit_and_push_patch(repo_path, f"{commit_message} (fallback log)", remote_url)
             else:
                 raise e
 
-        # Log to Firebase
+        # Step 3: Log to Firebase
         insert_log({
             "event": req.event,
             "context": req.context,
