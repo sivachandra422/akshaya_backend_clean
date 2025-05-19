@@ -8,22 +8,26 @@ firebase_initialized = False
 def init_firestore():
     global db, firebase_initialized
 
-    if not firebase_initialized:
-        firebase_path = os.getenv("FIREBASE_CREDS_PATH")
+    # Check for env variable
+    creds_path = os.getenv("FIREBASE_CREDS_PATH")
+    print("[DEBUG] FIREBASE_CREDS_PATH =", creds_path)
 
-        if not firebase_path:
-            raise ValueError("FIREBASE_CREDS_PATH is not set")
+    # Ensure path starts with "/" if relative
+    if creds_path and not creds_path.startswith("/"):
+        creds_path = "/" + creds_path
 
-        # Ensure absolute path if needed
-        if not firebase_path.startswith("/"):
-            firebase_path = "/" + firebase_path
+    if not creds_path or not os.path.exists(creds_path):
+        raise ValueError(f"[ERROR] Firebase credentials not found or path is invalid: {creds_path}")
 
-        if not os.path.exists(firebase_path):
-            raise ValueError(f"Firebase credentials path '{firebase_path}' is invalid or not found")
-
-        cred = credentials.Certificate(firebase_path)
+    try:
+        print(f"[INFO] Loading credentials from: {creds_path}")
+        cred = credentials.Certificate(creds_path)
         firebase_admin.initialize_app(cred)
         db = firestore.client()
         firebase_initialized = True
+        print("[SUCCESS] Firestore initialized successfully.")
+    except Exception as e:
+        print(f"[ERROR] Firestore init failed: {str(e)}")
+        raise e
 
     return db
