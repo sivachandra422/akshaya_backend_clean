@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
-from src.modules.git_utils import commit_and_push_patch
+from src.utils.git_utils import commit_and_push_patch
 from src.modules.nidhi_memory import insert_log
 
 router = APIRouter(prefix="/self")
