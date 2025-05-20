@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from firebase_connector import get_firestore_client
+from src.modules.firebase_connector import get_firestore_client
 from datetime import datetime
 
 router = APIRouter()
