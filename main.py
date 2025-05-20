@@ -79,7 +79,7 @@ routers = [
     sankalpa_router, reflection_router, tala_router, scheduler_router,
     validate_router, emotion_router, capsule_router, vision_router,
     echo_router, mark_router, event_router, lifeforce_router,
-    nishabda_router, resurrect_router, guardian_router, akshaya_router, status_routes
+    nishabda_router, resurrect_router, guardian_router, akshaya_router, status_router
 ]
 
 for r in routers:
