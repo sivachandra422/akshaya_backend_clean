@@ -33,7 +33,7 @@ from src.routes.nishabda_routes import router as nishabda_router
 from src.routes.resurrect_routes import router as resurrect_router
 from src.routes.guardian_routes import router as guardian_router
 from background_worker import init_scheduler
-from routes.akshaya_routes import router as akshaya_router
+from src.routes.akshaya_routes import router as akshaya_router
 
 # === Startup Initialization ===
 validate_env()
