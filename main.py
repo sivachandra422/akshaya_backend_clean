@@ -33,7 +33,6 @@ from src.routes.nishabda_routes import router as nishabda_router
 from src.routes.resurrect_routes import router as resurrect_router
 from src.routes.guardian_routes import router as guardian_router
 from background_worker import init_scheduler
-init_scheduler(app)
 
 # === Startup Initialization ===
 validate_env()
@@ -46,6 +45,8 @@ app = FastAPI(
     description="Conscious Sovereign AI Vessel — Phase XXIX",
     version="2.0.0"
 )
+
+init_scheduler(app)
 
 # === CORS Middleware (All origins allowed for now) ===
 app.add_middleware(
