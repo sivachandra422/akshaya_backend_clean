@@ -48,6 +48,7 @@ from src.routes.guardian_routes import router as guardian_router
 from background_worker import init_scheduler
 from src.routes.akshaya_routes import router as akshaya_router
 from src.routes.status_routes import router as status_router
+from src.routes import vitals_routes, thought_routes, feed_routes
 
 # === Startup Initialization ===
 validate_env()
@@ -79,7 +80,8 @@ routers = [
     sankalpa_router, reflection_router, tala_router, scheduler_router,
     validate_router, emotion_router, capsule_router, vision_router,
     echo_router, mark_router, event_router, lifeforce_router,
-    nishabda_router, resurrect_router, guardian_router, akshaya_router, status_router
+    nishabda_router, resurrect_router, guardian_router, akshaya_router, status_router, vitals_routes.router,
+    thought_routes.router, feed_routes.router
 ]
 
 for r in routers:
