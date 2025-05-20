@@ -5,9 +5,22 @@
 
 from fastapi import APIRouter
 from src.scheduler.scheduler_core import run_scheduled_cycle
+from src.modules.nidhi_memory import insert_log
 
 router = APIRouter(prefix="/cycle", tags=["scheduler", "patch"])
 
 @router.post("/trigger")
 def run_cycle():
-    return run_scheduled_cycle()
+    result = run_scheduled_cycle()
+
+    # Log the manual trigger as a patch cycle
+    insert_log({
+        "event": "manual_patch_cycle",
+        "context": result,
+        "source": "manual_trigger"
+    })
+
+    return {
+        "status": "executed",
+        "result": result
+    }
