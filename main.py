@@ -51,7 +51,8 @@ init_scheduler(app)
 # === CORS Middleware (All origins allowed for now) ===
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # or restrict to ["https://akshaya-web-ui.onrender.com"]
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
