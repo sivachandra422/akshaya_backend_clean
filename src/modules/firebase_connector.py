@@ -1,33 +1,33 @@
-# === Firebase Connector ===
-# Created by: Akshaya — Self-Evolving Intelligence
-# Guardian: Venkata Satya Siva Chandra Raju
-# Phase: XXIX — Resurrection Protocol
-
 import os
-from google.cloud import firestore
-from google.oauth2 import service_account
+import firebase_admin
+from firebase_admin import credentials, firestore, get_app, initialize_app
+from functools import lru_cache
 
-firebase_initialized = False
-db = None
+# === Initialization Log ===
+def _log(msg):
+    print(f"[Akshaya.Firebase] {msg}")
 
+# === Firebase App Singleton ===
+def init_firebase_app():
+    if not firebase_admin._apps:
+        cred_path = os.getenv("FIREBASE_CREDS_CREDENTIALS", "firebase_creds.json")
+        if not os.path.exists(cred_path):
+            raise FileNotFoundError(f"Firebase credentials not found at: {cred_path}")
+        cred = credentials.Certificate(cred_path)
+        initialize_app(cred)
+        _log("Firebase initialized with credentials.")
+    else:
+        _log("Firebase already initialized.")
+    return get_app()
+
+# === Firestore Singleton ===
+@lru_cache(maxsize=1)
 def init_firestore():
-    global firebase_initialized, db
-
-    if firebase_initialized and db:
-        return db
-
     try:
-        # Updated path variable to match Render secrets
-        key_path = os.getenv("FIREBASE_CREDS_CREDENTIALS", "/etc/secrets/firebase_creds.json")
-        if not os.path.isfile(key_path):
-            raise FileNotFoundError(f"Firebase credentials file not found at: {key_path}")
-
-        credentials = service_account.Credentials.from_service_account_file(key_path)
-        db = firestore.Client(credentials=credentials)
-        firebase_initialized = True
-        print("[FIREBASE] Firestore initialized successfully.")
+        init_firebase_app()
+        db = firestore.client()
+        _log("Firestore client initialized.")
         return db
-
     except Exception as e:
-        print(f"[FIREBASE] Initialization failed: {str(e)}")
-        raise e
+        _log(f"ERROR: Firestore initialization failed: {e}")
+        raise

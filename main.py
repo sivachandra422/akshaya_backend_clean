@@ -8,6 +8,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.utils.env_loader import validate_env
 from src.utils.log_formatter import setup_logger
 
+# === Firebase Initialization ===
+import firebase_admin
+from firebase_admin import credentials, get_app, initialize_app
+import os
+
+try:
+    firebase_admin.get_app()
+except ValueError:
+    cred_path = os.getenv("FIREBASE_CREDS_CREDENTIALS", "firebase_creds.json")
+    cred = credentials.Certificate(cred_path)
+    initialize_app(cred)
+
+
 # Import all routers
 from src.routes.voice import router as voice_router
 from src.routes.seed_identity_routes import router as identity_router
