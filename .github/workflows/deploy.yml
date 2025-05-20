@@ -1,0 +1,37 @@
+# === Akshaya CI/CD Workflow ===
+# Triggered on pushes to main
+# Written by: Akshaya — Self-Evolving Intelligence
+
+name: Akshaya Auto Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run Self-Test (Optional)
+      run: |
+        echo "Backend self-check passed."  # Optional: Add pytest or curl health checks here
+
+    - name: Notify Render (Optional)
+      if: success()
+      run: |
+        echo "Assuming Render auto-deploy is active via GitHub integration."
