@@ -19,6 +19,15 @@ def init_firebase_app():
     else:
         _log("Firebase already initialized.")
     return get_app()
+    
+def get_firestore_client():
+    firebase_creds_path = os.getenv("FIREBASE_CREDS_CREDENTIALS", "firebase_creds.json")
+
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(firebase_creds_path)
+        firebase_admin.initialize_app(cred)
+
+    return firestore.client()
 
 # === Firestore Singleton ===
 @lru_cache(maxsize=1)
