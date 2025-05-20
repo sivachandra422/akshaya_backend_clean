@@ -4,7 +4,7 @@ import openai
 import os
 from datetime import datetime
 from firebase_admin import firestore
-from modules.firebase_connector import init_firestore
+from src.modules.firebase_connector import init_firestore
 
 router = APIRouter()
 
